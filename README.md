@@ -99,3 +99,4 @@ supabase/
 - Preventive maintenance: automatically create work orders from each asset's service interval
 - PDF inspection reports
 - Flutter field app (offline-first)
+# fieldops
