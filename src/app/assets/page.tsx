@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { AssetStatusBadge, Card, PageHeader, Table, Td, TextLink } from "@/components/ui";
-import { getAssets, getAssetType, getSite, now } from "@/lib/data";
-import { formatDate, timeAgo } from "@/lib/format";
+import { getStore } from "@/lib/data";
+import { timeAgo } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Assets" };
 
-export default function AssetsPage() {
+export default async function AssetsPage() {
+  const store = await getStore();
+  const { getAssets, getAssetType, getSite, now, terms } = store;
+  const { formatDate } = store.fmt;
   const assets = getAssets();
   const dueSoon = assets.filter((a) => new Date(a.nextMaintenanceOn).getTime() - now.getTime() < 7 * 86_400_000);
 
@@ -13,7 +16,7 @@ export default function AssetsPage() {
     <>
       <PageHeader title="Assets" description={`${assets.length} assets · ${dueSoon.length} due for maintenance within 7 days`} />
       <Card padded={false}>
-        <Table head={["Asset", "Type", "Site", "Make / model", "Status", "Last inspected", "Next service"]}>
+        <Table head={["Asset", "Type", terms.site, "Make / model", "Status", "Last inspected", "Next service"]}>
           {assets.map((a) => {
             const due = dueSoon.includes(a);
             return (

@@ -2,15 +2,26 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { Badge, PageHeader } from "@/components/ui";
-import { getSites, siteSummary } from "@/lib/data";
+import { getStore } from "@/lib/data";
 
-export const metadata: Metadata = { title: "Sites" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getStore()).terms.sites };
+}
 
-export default function SitesPage() {
+export default async function SitesPage() {
+  const store = await getStore();
+  const { getSites, siteSummary, terms } = store;
   const sites = getSites();
   return (
     <>
-      <PageHeader title="Sites" description={`${sites.length} sites · ${sites.reduce((n, s) => n + s.capacityKw, 0).toLocaleString()} kW installed`} />
+      <PageHeader
+        title={terms.sites}
+        description={`${sites.length} ${terms.sites.toLowerCase()}${
+          store.profile.siteSize
+            ? ` · ${sites.reduce((n, s) => n + (s.size ?? 0), 0).toLocaleString()} ${store.profile.siteSize.unit} ${store.profile.siteSize.label}`
+            : ` · ${new Set(sites.map((s) => s.city.split(",").pop()!.trim())).size} locations`
+        }`}
+      />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {sites.map((site) => {
           const s = siteSummary(site);
@@ -35,7 +46,7 @@ export default function SitesPage() {
                   ["Assets", s.assets],
                   ["Issues", s.openIssues],
                   ["Open WOs", s.openWorkOrders],
-                  ["Techs", s.workers],
+                  [terms.technicians, s.workers],
                 ].map(([k, v]) => (
                   <div key={k}>
                     <dd className="text-lg font-semibold">{v}</dd>

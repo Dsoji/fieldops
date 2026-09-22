@@ -2,10 +2,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { QrCode } from "lucide-react";
 import { AssetStatusBadge, Button, Card, Empty, PageHeader, WorkOrderStatusBadge } from "@/components/ui";
-import { getAsset, getAssetType, getMaintenanceForAsset, getSite, getWorker, getWorkOrdersForAsset } from "@/lib/data";
-import { formatDate, titleCase } from "@/lib/format";
+import { getStore } from "@/lib/data";
+import { titleCase } from "@/lib/format";
 
 export default async function AssetPage({ params }: { params: Promise<{ id: string }> }) {
+  const store = await getStore();
+  const { getAsset, getAssetType, getMaintenanceForAsset, getSite, getWorker, getWorkOrdersForAsset, terms } = store;
+  const { formatDate } = store.fmt;
   const { id } = await params;
   const asset = getAsset(id);
   if (!asset) notFound();
@@ -68,7 +71,7 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
               ["Type", type?.name],
               ["Manufacturer", asset.manufacturer],
               ["Model", asset.model],
-              ["Site", <Link key="s" href={`/sites/${site?.id}`} className="hover:underline">{site?.name}</Link>],
+              [terms.site, <Link key="s" href={`/sites/${site?.id}`} className="hover:underline">{site?.name}</Link>],
               ["Last inspection", formatDate(asset.lastInspectedAt)],
               ["Next maintenance", formatDate(asset.nextMaintenanceOn)],
               ["Service interval", `Every ${type?.maintenanceIntervalDays} days`],

@@ -8,8 +8,10 @@
   --text: #16150f;
   --muted: #6b675d;
   --faint: #9a958a;
-  --accent: #e8a317;          /* SunGrid amber */
-  --accent-ink: #7a5200;
+  --accent: #e8a317;          /* overridden per demo profile / prospect brand */
+  --accent-fg: #14130f;       /* text on accent */
+  --accent-ink: color-mix(in oklab, var(--accent) 60%, black);
+  --accent-soft: color-mix(in oklab, var(--accent) 16%, white);
   --sidebar: #14130f;
   --sidebar-text: #bdb8ad;
   --critical: #d4351c;
@@ -35,6 +37,8 @@
   --color-faint: var(--faint);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
   --color-sidebar: var(--sidebar);
   --color-sidebar-text: var(--sidebar-text);
   --color-critical: var(--critical);

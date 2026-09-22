@@ -5,12 +5,6 @@ export type WorkOrderStatus = "open" | "assigned" | "in_progress" | "completed" 
 export type WorkOrderKind = "inspection" | "maintenance" | "installation" | "repair";
 export type IssueStatus = "open" | "acknowledged" | "in_progress" | "resolved";
 
-export interface Organization {
-  id: string;
-  name: string;
-  industry: string;
-}
-
 export interface Worker {
   id: string;
   fullName: string;
@@ -28,7 +22,7 @@ export interface Site {
   address: string;
   latitude: number;
   longitude: number;
-  capacityKw: number;
+  size?: number;
 }
 
 export interface AssetType {

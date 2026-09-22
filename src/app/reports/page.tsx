@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { Download } from "lucide-react";
 import { Button, Card, Meter, PageHeader, Stat } from "@/components/ui";
-import { getMonthlyMetrics } from "@/lib/data";
+import { getStore } from "@/lib/data";
 import { pct } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Reports" };
 
-export default function ReportsPage() {
-  const m = getMonthlyMetrics();
+export default async function ReportsPage() {
+  const store = await getStore();
+  const { getMetrics, terms } = store;
+  const m = getMetrics();
   const max = Math.max(...m.weekly.map((w) => w.created));
   const completionRate = m.workOrdersCompleted / m.workOrdersCreated;
   const inspectionRate = m.inspectionsDone / m.inspectionsScheduled;
@@ -16,7 +18,7 @@ export default function ReportsPage() {
     <>
       <PageHeader
         title="Reports"
-        description={`${m.month} · month to date`}
+        description={`${m.period} · across ${store.getSites().length} ${terms.sites.toLowerCase()}`}
         actions={<Button><Download className="size-4" /> Export PDF</Button>}
       />
 

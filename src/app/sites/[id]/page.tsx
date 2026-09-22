@@ -13,10 +13,13 @@ import {
   TextLink,
   WorkOrderStatusBadge,
 } from "@/components/ui";
-import { getAssetsForSite, getAssetType, getIssuesForSite, getSite, getWorkOrdersForSite, isOpenWorkOrder, siteSummary } from "@/lib/data";
-import { formatDate, formatDue, timeAgo } from "@/lib/format";
+import { getStore, isOpenWorkOrder } from "@/lib/data";
+import { formatDue, timeAgo } from "@/lib/format";
 
 export default async function SitePage({ params }: { params: Promise<{ id: string }> }) {
+  const store = await getStore();
+  const { getAssetsForSite, getAssetType, getIssuesForSite, getSite, getWorkOrdersForSite, siteSummary, terms } = store;
+  const { formatDate } = store.fmt;
   const { id } = await params;
   const site = getSite(id);
   if (!site) notFound();
@@ -29,15 +32,15 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
   return (
     <>
       <PageHeader
-        eyebrow={<Link href="/sites" className="hover:text-text">Sites / <span className="font-mono">{site.code}</span></Link>}
+        eyebrow={<Link href="/sites" className="hover:text-text">{terms.sites} / <span className="font-mono">{site.code}</span></Link>}
         title={site.name}
-        description={`${site.address} · ${site.capacityKw.toLocaleString()} kW · ${site.latitude.toFixed(4)}, ${site.longitude.toFixed(4)}`}
+        description={`${site.address}, ${site.city}${site.size && store.profile.siteSize ? ` · ${site.size.toLocaleString()} ${store.profile.siteSize.unit}` : ""} · ${site.latitude.toFixed(4)}, ${site.longitude.toFixed(4)}`}
       />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Assets" value={s.assets} hint={`${s.assetsDown} down`} />
         <Stat label="Open issues" value={s.openIssues} tone={s.criticalIssues ? "critical" : "default"} />
         <Stat label="Open work orders" value={s.openWorkOrders} />
-        <Stat label="Technicians based here" value={s.workers} />
+        <Stat label={`${terms.technicians} based here`} value={s.workers} />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
@@ -55,7 +58,7 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
               </tr>
             ))}
           </Table>
-          {!assets.length && <Empty>No assets registered at this site.</Empty>}
+          {!assets.length && <Empty>No assets registered here.</Empty>}
         </Card>
 
         <div className="space-y-6">

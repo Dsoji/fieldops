@@ -4,8 +4,15 @@ Management dashboard for FieldOps, a platform that digitises field operations:
 work orders, GPS-verified site visits, inspections, issue reporting and asset
 maintenance history.
 
-The demo tenant is **SunGrid Energy**, a fictional Nigerian solar and mini-grid
-operator with 6 sites, 14 assets and 7 field staff.
+The demo switches between four industries, each telling the same story with its own
+vocabulary, sites and equipment:
+
+| Industry | Demo company | Region |
+|---|---|---|
+| Solar & mini-grids | SunGrid Energy | Nigeria |
+| Telecom towers | Meridian Towers | Nigeria, Ghana, Côte d'Ivoire, Kenya, Zambia, Rwanda |
+| Facility management | Crescent Facilities | UAE |
+| Oil & gas services | Deltaline Energy Services | Niger Delta |
 
 ## Run it
 
@@ -16,14 +23,37 @@ npm run dev
 
 Open http://localhost:3000.
 
-The dashboard runs on demo data (`src/lib/demo-data.ts`), so you don't need a backend to present it.
+The dashboard runs on demo data, so you don't need a backend to present it.
+
+## Presenting to a prospect
+
+Click **Demo** (bottom-right) to open the presenter controls:
+
+- **Industry**: switch the whole product to the prospect's industry in one click.
+- **Brand for a prospect**: their company name, the person you're meeting, their brand colour and a logo URL.
+- **Copy personalised demo link**: a link that opens the demo already branded, to send before or after the meeting.
+
+The link format is:
+
+```
+/demo?industry=telecom&client=Acme%20Towers&manager=Jane%20Doe&color=%230a7cff&logo=https://acme.com/logo.png
+```
+
+`industry` is one of `solar`, `telecom`, `facilities`, `oil-gas`. Everything else is optional.
+
+### Going further for a serious prospect (about an hour)
+
+Copy the closest profile in `src/lib/demo/profiles/`, rename it, and replace the sites, equipment, issues
+and work-order titles with ones from their operation (using their real site and equipment names lands hardest).
+Register it in `profiles/index.ts` and add its key to `IndustryKey` in `profile.ts`. The comments in
+`profile.ts` explain which slot plays which role in the story.
 
 ## Demo script (5 minutes)
 
-1. **Overview**: a critical issue banner is live. Emeka reported INV-104 overheating at Warri 22 minutes ago, with photos.
+1. **Overview**: a critical issue banner is live. A technician reported a failure 22 minutes ago, with photos. All times are relative to now, so the demo always looks live.
 2. Click **View details** to see the field report, the photos stamped with time and GPS, the asset and the reporter.
 3. Click **Create work order**. The form is pre-filled from the issue. Pick a technician (the ones based at that site appear first) and submit. The technician gets a push notification.
-4. **Assets → INV-104** shows its maintenance history and upcoming service.
+4. **Assets** → the failed asset shows its maintenance history and upcoming service.
 5. **Reports** shows completion rate, average time to resolve an issue, share fixed on the first visit and share of GPS-verified check-ins.
 
 ## Structure
@@ -31,11 +61,17 @@ The dashboard runs on demo data (`src/lib/demo-data.ts`), so you don't need a ba
 ```
 src/
   app/                  routes: overview, issues, work-orders, sites, assets, workers, reports
+    demo/route.ts       personalised demo links
+    actions.ts          presenter panel actions
   components/           sidebar, topbar, shared UI (badges, tables, cards)
   lib/
     types.ts            domain types
-    demo-data.ts        SunGrid Energy demo dataset
-    data.ts             data access layer (every page reads through this)
+    data.ts             data access layer (every page reads through getStore())
+    demo/
+      skeleton.ts       the demo storyline: relationships, statuses, timings
+      profile.ts        what an industry profile provides
+      profiles/         solar, telecom, facilities, oil-gas
+      config.ts         presenter settings (industry + prospect branding)
     supabase/server.ts  Supabase client for when the backend is connected
 supabase/
   migrations/0001_init.sql   multi-tenant Postgres schema with row-level security
@@ -46,7 +82,7 @@ supabase/
 
 1. Create a Supabase project and copy `.env.example` to `.env.local`.
 2. Apply `supabase/migrations/0001_init.sql` and then `supabase/seed.sql`.
-3. Replace the getters in `src/lib/data.ts` with queries through `createClient()`.
+3. Replace the getters in `createStore()` (`src/lib/data.ts`) with queries through `createClient()`.
    Pages don't need to change.
 
 ## Design decisions

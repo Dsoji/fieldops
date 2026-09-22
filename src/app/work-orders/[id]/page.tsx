@@ -2,10 +2,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Check, Circle, MapPinCheck } from "lucide-react";
 import { Avatar, Card, PageHeader, PriorityBadge, WorkOrderStatusBadge } from "@/components/ui";
-import { getAsset, getIssue, getSite, getWorker, getWorkOrders } from "@/lib/data";
-import { formatDate, formatDue, formatTime, titleCase } from "@/lib/format";
+import { getStore } from "@/lib/data";
+import { formatDue, titleCase } from "@/lib/format";
 
 export default async function WorkOrderPage({ params }: { params: Promise<{ id: string }> }) {
+  const store = await getStore();
+  const { getAsset, getIssue, getSite, getWorker, getWorkOrders, terms } = store;
+  const { formatDate, formatTime } = store.fmt;
   const { id } = await params;
   const wo = getWorkOrders().find((w) => w.id === id);
   if (!wo) notFound();
@@ -74,7 +77,7 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ id: 
           <Card title="Details">
             <dl className="space-y-2.5 text-sm">
               <div>
-                <dt className="text-xs text-muted">Site</dt>
+                <dt className="text-xs text-muted">{terms.site}</dt>
                 <dd><Link className="hover:underline" href={`/sites/${site?.id}`}>{site?.name}</Link></dd>
               </div>
               {asset && (

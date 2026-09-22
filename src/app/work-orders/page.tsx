@@ -11,12 +11,14 @@ import {
   TextLink,
   WorkOrderStatusBadge,
 } from "@/components/ui";
-import { getAsset, getSite, getWorker, getWorkOrders, isOpenWorkOrder, isOverdue } from "@/lib/data";
+import { getStore, isOpenWorkOrder, isOverdue } from "@/lib/data";
 import { formatDue, titleCase } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Work orders" };
 
-export default function WorkOrdersPage() {
+export default async function WorkOrdersPage() {
+  const store = await getStore();
+  const { getAsset, getSite, getWorker, getWorkOrders, terms } = store;
   const all = getWorkOrders();
   const open = all.filter(isOpenWorkOrder);
 
@@ -32,7 +34,7 @@ export default function WorkOrdersPage() {
         }
       />
       <Card padded={false}>
-        <Table head={["Work order", "Type", "Site / asset", "Assignee", "Priority", "Status", "Due"]}>
+        <Table head={["Work order", "Type", `${terms.site} / asset`, "Assignee", "Priority", "Status", "Due"]}>
           {all.map((wo) => {
             const worker = getWorker(wo.assignedTo);
             const asset = wo.assetId ? getAsset(wo.assetId) : undefined;

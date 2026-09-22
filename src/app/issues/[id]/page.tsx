@@ -11,10 +11,13 @@ import {
   PriorityBadge,
   WorkOrderStatusBadge,
 } from "@/components/ui";
-import { getAsset, getIssue, getSite, getWorker, getWorkOrders } from "@/lib/data";
-import { formatDate, formatTime, timeAgo } from "@/lib/format";
+import { getStore } from "@/lib/data";
+import { timeAgo } from "@/lib/format";
 
 export default async function IssuePage({ params }: { params: Promise<{ id: string }> }) {
+  const store = await getStore();
+  const { getAsset, getIssue, getSite, getWorker, getWorkOrders, terms } = store;
+  const { formatDate, formatTime } = store.fmt;
   const { id } = await params;
   const issue = getIssue(id);
   if (!issue) notFound();
@@ -91,7 +94,7 @@ export default async function IssuePage({ params }: { params: Promise<{ id: stri
               </ul>
             ) : (
               <div className="px-4 py-6 text-sm text-muted">
-                No work order yet. Create one to dispatch a technician.
+                {`No work order yet. Create one to dispatch a ${terms.technician.toLowerCase()}.`}
               </div>
             )}
           </Card>

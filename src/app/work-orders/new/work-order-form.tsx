@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CheckCircle2, Smartphone } from "lucide-react";
+import type { Terms } from "@/lib/demo/profile";
 import type { Priority, WorkOrderKind } from "@/lib/types";
 
 type Option = { id: string; label: string };
@@ -11,6 +12,8 @@ interface Props {
   sites: Option[];
   assets: (Option & { siteId: string })[];
   workers: (Option & { onShift: boolean; baseSiteId: string })[];
+  terms: Terms;
+  today: string; // YYYY-MM-DD
   initial?: {
     title: string;
     description: string;
@@ -28,7 +31,7 @@ const kinds: WorkOrderKind[] = ["inspection", "maintenance", "repair", "installa
 const field = "h-9 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-text";
 const label = "mb-1.5 block text-xs font-medium text-muted";
 
-export function WorkOrderForm({ sites, assets, workers, initial }: Props) {
+export function WorkOrderForm({ sites, assets, workers, terms, today, initial }: Props) {
   const [siteId, setSiteId] = useState(initial?.siteId ?? sites[0].id);
   const [assetId, setAssetId] = useState(initial?.assetId ?? "");
   const [priority, setPriority] = useState<Priority>(initial?.priority ?? "medium");
@@ -87,7 +90,7 @@ export function WorkOrderForm({ sites, assets, workers, initial }: Props) {
         )}
         <div>
           <label className={label} htmlFor="title">Title</label>
-          <input id="title" required defaultValue={initial?.title} className={field} placeholder="e.g. Inspect inverter INV-104" />
+          <input id="title" required defaultValue={initial?.title} className={field} placeholder="e.g. Routine inspection" />
         </div>
         <div>
           <label className={label} htmlFor="desc">Instructions</label>
@@ -96,12 +99,12 @@ export function WorkOrderForm({ sites, assets, workers, initial }: Props) {
             rows={4}
             defaultValue={initial?.description}
             className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-text"
-            placeholder="What should the technician do on site?"
+            placeholder={`What should the ${terms.technician.toLowerCase()} do on site?`}
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className={label} htmlFor="site">Site</label>
+            <label className={label} htmlFor="site">{terms.site}</label>
             <select id="site" className={field} value={siteId} onChange={(e) => { setSiteId(e.target.value); setAssetId(""); }}>
               {sites.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
@@ -109,7 +112,7 @@ export function WorkOrderForm({ sites, assets, workers, initial }: Props) {
           <div>
             <label className={label} htmlFor="asset">Asset</label>
             <select id="asset" className={field} value={assetId} onChange={(e) => setAssetId(e.target.value)}>
-              <option value="">Whole site</option>
+              <option value="">{`Whole ${terms.site.toLowerCase()}`}</option>
               {siteAssets.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
             </select>
           </div>
@@ -121,7 +124,7 @@ export function WorkOrderForm({ sites, assets, workers, initial }: Props) {
           </div>
           <div>
             <label className={label} htmlFor="due">Due</label>
-            <input id="due" type="date" className={field} defaultValue="2026-09-22" />
+            <input id="due" type="date" className={field} defaultValue={today} />
           </div>
         </div>
         <div>
@@ -160,7 +163,7 @@ export function WorkOrderForm({ sites, assets, workers, initial }: Props) {
                 >
                   <input type="radio" name="assignee" value={w.id} checked={assignee === w.id} onChange={() => setAssignee(w.id)} className="accent-black" />
                   <span className="flex-1">{w.label}</span>
-                  {w.baseSiteId === siteId && <span className="text-[11px] text-ok">At this site</span>}
+                  {w.baseSiteId === siteId && <span className="text-[11px] whitespace-nowrap text-ok">Based here</span>}
                   {!w.onShift && <span className="text-[11px] text-faint">Off shift</span>}
                 </label>
               </li>
@@ -168,7 +171,7 @@ export function WorkOrderForm({ sites, assets, workers, initial }: Props) {
           </ul>
         </div>
         <button type="submit" className="h-10 w-full rounded-md bg-text text-sm font-medium text-white hover:bg-text/90">
-          Create and notify technician
+          Create and notify {terms.technician.toLowerCase()}
         </button>
       </div>
     </form>

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Avatar, Badge, Card, PageHeader, Table, Td } from "@/components/ui";
-import { getSite, getWorkers, getWorkOrders, isOpenWorkOrder } from "@/lib/data";
+import { getStore, isOpenWorkOrder } from "@/lib/data";
 import { titleCase } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Field team" };
 
-export default function WorkersPage() {
+export default async function WorkersPage() {
+  const store = await getStore();
+  const { getSite, getWorkers, getWorkOrders, terms } = store;
   const workers = getWorkers();
   const wos = getWorkOrders();
 
@@ -13,7 +15,7 @@ export default function WorkersPage() {
     <>
       <PageHeader title="Field team" description={`${workers.length} people · roles control what each person can see and do.`} />
       <Card padded={false}>
-        <Table head={["Name", "Role", "Base site", "Open work", "Completed", "Shift"]}>
+        <Table head={["Name", "Role", `Base ${terms.site.toLowerCase()}`, "Open work", "Completed", "Shift"]}>
           {workers.map((w) => {
             const mine = wos.filter((o) => o.assignedTo === w.id);
             const onSite = mine.find((o) => o.checkInVerified && o.status === "in_progress");
